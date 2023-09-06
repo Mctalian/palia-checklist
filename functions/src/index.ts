@@ -34,6 +34,7 @@ type WikiPage = {
 export const paliaWikiResetWeeklyWants = onRequest({
   timeoutSeconds: 240,
   secrets: [functionSecretHeader, wikiApiUrl, wikiUsername, wikiPassword],
+  serviceAccount: "reset-weekly-wants-fn@palia-checklist.iam.gserviceaccount.com"
 },
 async (request: Request, response: express.Response<unknown>) => {
   if (request.headers["X-RPANDERS-SECRET"] !== functionSecretHeader.value()) {
