@@ -15,10 +15,10 @@ import * as Wikiapi from "wikiapi";
 
 const { skip_edit: skipEdit } = Wikiapi;
 
-const doResetWeek = defineBoolean("DO_RESET_WEEK", { default: false }).value();
-const wikiApiUrl = defineSecret("WIKI_API_URL").value();
-const wikiUsername = defineSecret("WIKI_USERNAME").value();
-const wikiPassword = defineSecret("WIKI_PASSWORD").value();
+const doResetWeek = defineBoolean("DO_RESET_WEEK", { default: false });
+const wikiApiUrl = defineSecret("WIKI_API_URL");
+const wikiUsername = defineSecret("WIKI_USERNAME");
+const wikiPassword = defineSecret("WIKI_PASSWORD");
 
 type Wiki = {
   categorymembers: (s: string) => Promise<WikiPage[]>;
@@ -32,9 +32,19 @@ type WikiPage = {
 
 export const paliaWikiResetWeeklyWants = onRequest(
   async (request: Request, response: express.Response<unknown>) => {
-    logger.info(`doResetWeek? ${doResetWeek.toString()}`, { structuredData: true });
-    await resetWeeklyWants();
-    response.send("Weekly Wants Reset");
+    logger.info(`doResetWeek? ${doResetWeek.value().toString()}`, { structuredData: true });
+    await resetWeeklyWants().catch((reason: unknown) => {
+      if (reason instanceof Error) {
+        logger.error(`${reason.name}: ${reason.message}`);
+        logger.error(reason.stack);
+      } else {
+        logger.error(JSON.stringify(reason));
+      }
+      response.status(500).send("There was an error when resetting the weekly wants");
+      return;
+    });
+    const successMessage = doResetWeek.value() ? "Weekly Wants Reset" : "We didn't actually do anything";
+    response.send(successMessage);
   }
 );
 
@@ -57,8 +67,8 @@ async function getEnglishVillagerPages(wiki: Wiki) {
  * Edits each English villager page to reset the Weekly Wants
  */
 export async function resetWeeklyWants() {
-  const wiki = new Wikiapi(wikiApiUrl);
-  await wiki.login(wikiUsername, wikiPassword);
+  const wiki = new Wikiapi(wikiApiUrl.value());
+  await wiki.login(wikiUsername.value(), wikiPassword.value());
 
   const enVillagers = await getEnglishVillagerPages(wiki);
 
