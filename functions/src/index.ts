@@ -16,6 +16,7 @@ import * as Wikiapi from "wikiapi";
 const { skip_edit: skipEdit } = Wikiapi;
 
 const doResetWeek = defineBoolean("DO_RESET_WEEK", { default: false });
+const functionSecretHeader = defineSecret("FUNCTION_SECRET_HEADER");
 const wikiApiUrl = defineSecret("WIKI_API_URL");
 const wikiUsername = defineSecret("WIKI_USERNAME");
 const wikiPassword = defineSecret("WIKI_PASSWORD");
@@ -30,22 +31,28 @@ type WikiPage = {
   wikitext: string;
 }
 
-export const paliaWikiResetWeeklyWants = onRequest(
-  async (request: Request, response: express.Response<unknown>) => {
-    logger.info(`doResetWeek? ${doResetWeek.value().toString()}`, { structuredData: true });
-    await resetWeeklyWants().catch((reason: unknown) => {
-      if (reason instanceof Error) {
-        logger.error(`${reason.name}: ${reason.message}`);
-        logger.error(reason.stack);
-      } else {
-        logger.error(JSON.stringify(reason));
-      }
-      response.status(500).send("There was an error when resetting the weekly wants");
-      return;
-    });
-    const successMessage = doResetWeek.value() ? "Weekly Wants Reset" : "We didn't actually do anything";
-    response.send(successMessage);
+export const paliaWikiResetWeeklyWants = onRequest({
+  timeoutSeconds: 240,
+  secrets: [functionSecretHeader, wikiApiUrl, wikiUsername, wikiPassword],
+},
+async (request: Request, response: express.Response<unknown>) => {
+  if (request.headers["X-RPANDERS-SECRET"] !== functionSecretHeader.value()) {
+    response.status(401).send("Unauthorized Request");
   }
+  logger.info(`doResetWeek? ${doResetWeek.value().toString()}`, { structuredData: true });
+  await resetWeeklyWants().catch((reason: unknown) => {
+    if (reason instanceof Error) {
+      logger.error(`${reason.name}: ${reason.message}`);
+      logger.error(reason.stack);
+    } else {
+      logger.error(JSON.stringify(reason));
+    }
+    response.status(500).send("There was an error when resetting the weekly wants");
+    return;
+  });
+  const successMessage = doResetWeek.value() ? "Weekly Wants Reset" : "We didn't actually do anything";
+  response.send(successMessage);
+}
 );
 
 
@@ -75,13 +82,13 @@ export async function resetWeeklyWants() {
   await wiki.for_each_page(
     enVillagers,
     (pageData: WikiPage) => {
-      const editedText = pageData.wikitext.replace(
-        /\{\{Weekly Wants.*\}\}/,
-        "{{Weekly Wants|ChapaaCurious|ChapaaCurious|ChapaaCurious|ChapaaCurious}}"
-      );
-      if (doResetWeek) {
+      // const editedText = pageData.wikitext.replace(
+      //   /\{\{Weekly Wants.*\}\}/,
+      //   "{{Weekly Wants|ChapaaCurious|ChapaaCurious|ChapaaCurious|ChapaaCurious}}"
+      // );
+      if (doResetWeek.value()) {
         logger.info("Actually resetting!", { structuredData: true });
-        return editedText;
+        return skipEdit;
       } else {
         logger.info("No edit!", { structuredData: true });
         return skipEdit;
