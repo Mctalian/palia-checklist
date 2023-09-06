@@ -80,13 +80,13 @@ export async function resetWeeklyWants() {
   await wiki.for_each_page(
     enVillagers,
     (pageData: WikiPage) => {
-      // const editedText = pageData.wikitext.replace(
-      //   /\{\{Weekly Wants.*\}\}/,
-      //   "{{Weekly Wants|ChapaaCurious|ChapaaCurious|ChapaaCurious|ChapaaCurious}}"
-      // );
+      const editedText = pageData.wikitext.replace(
+        /\{\{Weekly Wants.*\}\}/,
+        "{{Weekly Wants|ChapaaCurious|ChapaaCurious|ChapaaCurious|ChapaaCurious}}"
+      );
       if (doResetWeek.value()) {
         logger.info("Actually resetting!", { structuredData: true });
-        return skipEdit;
+        return editedText;
       } else {
         logger.info("No edit!", { structuredData: true });
         return skipEdit;
