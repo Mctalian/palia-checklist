@@ -7,16 +7,14 @@
  * See a full list of supported triggers at https://firebase.google.com/docs/functions
  */
 
-import { onRequest, Request } from "firebase-functions/v2/https";
+import { onSchedule } from "firebase-functions/v2/scheduler";
 import { defineBoolean, defineSecret } from "firebase-functions/params";
 import * as logger from "firebase-functions/logger";
-import * as express from "express";
 import * as Wikiapi from "wikiapi";
 
 const { skip_edit: skipEdit } = Wikiapi;
 
 const doResetWeek = defineBoolean("DO_RESET_WEEK", { default: false });
-const functionSecretHeader = defineSecret("FUNCTION_SECRET_HEADER");
 const wikiApiUrl = defineSecret("WIKI_API_URL");
 const wikiUsername = defineSecret("WIKI_USERNAME");
 const wikiPassword = defineSecret("WIKI_PASSWORD");
@@ -31,29 +29,28 @@ type WikiPage = {
   wikitext: string;
 }
 
-export const paliaWikiResetWeeklyWants = onRequest({
-  timeoutSeconds: 240,
-  secrets: [functionSecretHeader, wikiApiUrl, wikiUsername, wikiPassword],
-  serviceAccount: "reset-weekly-wants-fn@palia-checklist.iam.gserviceaccount.com"
-},
-async (request: Request, response: express.Response<unknown>) => {
-  if (request.headers["X-RPANDERS-SECRET"] !== functionSecretHeader.value()) {
-    response.status(401).send("Unauthorized Request");
+export const paliaWikiResetWeeklyWants = onSchedule(
+  {
+    schedule: "0 22 * * SUN",
+    timeZone: "America/Denver",
+    timeoutSeconds: 240,
+    secrets: [wikiApiUrl, wikiUsername, wikiPassword],
+    serviceAccount: "reset-weekly-wants-fn@palia-checklist.iam.gserviceaccount.com",
+  },
+  async () => {
+    logger.info(`doResetWeek? ${doResetWeek.value().toString()}`, { structuredData: true });
+    await resetWeeklyWants().catch((reason: unknown) => {
+      if (reason instanceof Error) {
+        logger.error(`${reason.name}: ${reason.message}`, { structuredData: true });
+        logger.error(reason.stack, { structuredData: true });
+      } else {
+        logger.error(JSON.stringify(reason), { structuredData: true });
+      }
+      return;
+    });
+    const successMessage = doResetWeek.value() ? "Weekly Wants Reset" : "We didn't actually do anything";
+    logger.log(successMessage, { structuredData: true });
   }
-  logger.info(`doResetWeek? ${doResetWeek.value().toString()}`, { structuredData: true });
-  await resetWeeklyWants().catch((reason: unknown) => {
-    if (reason instanceof Error) {
-      logger.error(`${reason.name}: ${reason.message}`);
-      logger.error(reason.stack);
-    } else {
-      logger.error(JSON.stringify(reason));
-    }
-    response.status(500).send("There was an error when resetting the weekly wants");
-    return;
-  });
-  const successMessage = doResetWeek.value() ? "Weekly Wants Reset" : "We didn't actually do anything";
-  response.send(successMessage);
-}
 );
 
 
