@@ -1,8 +1,6 @@
 {
-  "name": "functions",
+  "name": "palia-checklist",
   "scripts": {
-    "fmt": "prettier . -c",
-    "fmt:fix": "prettier . --write",
     "lint": "eslint --ext .js,.ts .",
     "lint:fix": "eslint --fix --ext .js,.ts .",
     "build": "tsc",
@@ -10,7 +8,6 @@
     "serve": "npm run build && firebase emulators:start --only functions",
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",
-    "emu:all": "kill-port 6060 5050 8118 && firebase emulators:start",
     "db": "firebase emulators:start --only firestore",
     "deploy": "firebase deploy --only functions",
     "logs": "firebase functions:log"
@@ -30,11 +27,10 @@
     "@typescript-eslint/eslint-plugin": "^5.12.0",
     "@typescript-eslint/parser": "^5.12.0",
     "eslint": "^8.9.0",
+    "eslint-config-google": "^0.14.0",
     "eslint-plugin-import": "^2.25.4",
     "eslint-plugin-prettier": "5.0.0",
     "firebase-functions-test": "^3.1.0",
-    "kill-port": "2.0.1",
-    "prettier": "^3.0.3",
     "typescript": "^4.9.0"
   },
   "private": true
