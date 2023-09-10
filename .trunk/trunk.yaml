@@ -21,7 +21,15 @@ lint:
     - trivy@0.45.0
     - trufflehog@3.54.3
     - yamllint@1.32.0
+  ignore:
+    - linters: [trufflehog]
+      paths:
+        - yarn.lock
   definitions:
+    - name: trufflehog
+      commands:
+        - name: lint
+          run: trufflehog filesystem --json --fail --only-verified ${target}
     - name: eslint
       extra_packages:
         - eslint-plugin-import
