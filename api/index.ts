@@ -2,16 +2,19 @@ import dotenv from "dotenv";
 import express from "express";
 import Wikiapi from "wikiapi";
 
-import { getAllVillagerLikesAndWeeklyWants, getVillagerWeeklyWants, knownGifts, resetWeeklyWants, villagerLikes, villagerWeeklyWants } from "./src/gifts";
+import {
+  getAllVillagerLikesAndWeeklyWants,
+  getVillagerWeeklyWants,
+  knownGifts,
+  resetWeeklyWants,
+  villagerLikes,
+  villagerWeeklyWants,
+} from "./src/gifts";
 import { allItems, getAllKnownItems } from "./src/items";
 
 dotenv.config();
 
-const {
-  WIKI_API_URL,
-  WIKI_USERNAME,
-  WIKI_PASSWORD,
-} = process.env;
+const { WIKI_API_URL, WIKI_USERNAME, WIKI_PASSWORD } = process.env;
 
 let wiki;
 
@@ -29,7 +32,7 @@ let wiki;
   }
 
   if (diff.size) {
-    console.warn("Found gift(s) missing from all items.")
+    console.warn("Found gift(s) missing from all items.");
     console.log([...diff]);
   }
 
@@ -59,5 +62,4 @@ let wiki;
   app.listen(3000, () => {
     console.log("Server runniong on port 3000");
   });
-
 })();
