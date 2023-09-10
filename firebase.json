@@ -13,10 +13,8 @@
         "firebase-debug.log",
         "firebase-debug.*.log"
       ],
-      "predeploy": [
-        "npm --prefix \"$RESOURCE_DIR\" run lint",
-        "npm --prefix \"$RESOURCE_DIR\" run build"
-      ]
+      "predeploy": ["trunk check", "yarn workspaces run build"],
+      "runtime": "nodejs18"
     }
   ],
   "emulators": {

@@ -6,7 +6,6 @@ import {
   DocumentSnapshot,
   Firestore,
 } from "firebase-admin/firestore";
-import * as Wikiapi from "wikiapi";
 import { wikiApiUrl, wikiUsername, wikiPassword } from "../utils/params";
 import {
   arrowItems,
@@ -27,6 +26,7 @@ import {
   smokeBombItems,
   treasureChestItems,
 } from "../utils/items";
+import { getLoggedInWiki } from "../utils/wiki";
 
 type GetAllItemsRequest = {
   reset: boolean;
@@ -70,13 +70,14 @@ export const getAllItems = onCall(
         nextRefresh: await timeOfNextAutoRefresh(db),
       };
     } else {
+      logger.info("We have existing data!");
       // Kick off a refresh of the data;
       const isStale = await isDataStale(db);
       if (isStale) {
-        queryWiki().then(() => {
-          logLastRefreshTime(db);
-          addItemsToCollections(db);
-        });
+        logger.info("Aaaaaand it's stale :/");
+        await queryWiki();
+        await logLastRefreshTime(db);
+        await addItemsToCollections(db);
       }
       return {
         items: Array.from(items),
@@ -120,8 +121,7 @@ async function getItemsFromSingleTypeCollection(
 }
 
 async function queryWiki() {
-  const wiki = new Wikiapi(wikiApiUrl.value());
-  await wiki.login(wikiUsername.value(), wikiPassword.value());
+  const wiki = await getLoggedInWiki();
   await getAllKnownItems(wiki);
 }
 
@@ -196,6 +196,6 @@ async function addItemsToSingleCollection(
     .collection(subcollection);
 
   for (const item of items) {
-    collection.add({ name: item });
+    await collection.doc(item).set({ name: item });
   }
 }

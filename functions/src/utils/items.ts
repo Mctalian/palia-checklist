@@ -199,6 +199,12 @@ async function getAllJunk(wiki: Wiki) {
 async function getAllMaterials(wiki: Wiki) {
   const pages = (await wiki.categorymembers("Material")).map((p) => p.title);
   for (const page of pages) {
+    if (page.indexOf("Materials") >= 0) {
+      continue;
+    }
+    if (page.indexOf("/") >= 0) {
+      continue;
+    }
     materialItems.add(page);
   }
   console.assert(

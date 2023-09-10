@@ -9,6 +9,7 @@ import * as logger from "firebase-functions/logger";
 import * as Wikiapi from "wikiapi";
 import { WikiPage } from "../utils/types";
 import { getEnglishVillagerPages } from "../utils/page-helpers";
+import { getLoggedInWiki } from "../utils/wiki";
 
 const { skip_edit: skipEdit } = Wikiapi;
 
@@ -47,8 +48,7 @@ export const paliaWikiResetWeeklyWants = onSchedule(
  * Edits each English villager page to reset the Weekly Wants
  */
 async function resetWeeklyWants() {
-  const wiki = new Wikiapi(wikiApiUrl.value());
-  await wiki.login(wikiUsername.value(), wikiPassword.value());
+  const wiki = await getLoggedInWiki();
 
   const enVillagers = await getEnglishVillagerPages(wiki);
 

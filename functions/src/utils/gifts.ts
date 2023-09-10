@@ -7,8 +7,8 @@ import {
 } from "./items";
 import { skip_edit as skipEdit } from "wikiapi";
 import { Wiki, WikiPage } from "./types";
-
-const CURRENT_NUMBER_OF_VILLAGERS = 23;
+import { getEnglishVillagerPages } from "./page-helpers";
+import { CURRENT_NUMBER_OF_VILLAGERS } from "./villagers";
 
 export type WeeklyWant = {
   item: string;
@@ -20,7 +20,7 @@ export const villagerWeeklyWants = new Map<string, WeeklyWant[]>();
 
 export const knownGifts = new Set<string>();
 
-function getVillagerLikes(pageData: WikiPage) {
+export function getVillagerLikes(pageData: WikiPage) {
   const pageText = pageData.wikitext;
   // console.log(pageText);
   const likesSectionHeader = "==== Likes ====\n";
@@ -72,49 +72,37 @@ function getVillagerLikes(pageData: WikiPage) {
   return new Set<string>(likesList);
 }
 
-export function getVillagerWeeklyWants(pageData: WikiPage) {
-  const pageText = pageData.wikitext;
-  // console.log(pageText);
-  const weeklyWantsTemplate = "{{Weekly Wants|";
-  const beginningOfWeeklyWants = pageText.indexOf(weeklyWantsTemplate);
-  const templateEnder = "}}"; // Assumption
-  const endOfWeeklyWantsSection = pageText.indexOf(
-    templateEnder,
-    beginningOfWeeklyWants,
-  );
-  const weeklyWantsSection = pageText
-    .substring(beginningOfWeeklyWants, endOfWeeklyWantsSection)
-    .substring(weeklyWantsTemplate.length);
-  return weeklyWantsSection.split("|");
-}
-
-async function getEnglishVillagerPages(wiki: Wiki) {
-  const villagers = await wiki.categorymembers("Villager");
-  const villagerPageTitles = villagers.map((p) => p.title);
-  const includesWeeklyWants = await wiki.embeddedin("Template:Weekly_Wants");
-  return includesWeeklyWants.filter((a) =>
-    villagerPageTitles.includes(a.title),
-  );
-}
-
-export async function resetWeeklyWants(wiki: Wiki) {
+export async function getVillagerWeeklyWants(wiki: Wiki) {
   const enVillagers = await getEnglishVillagerPages(wiki);
 
-  await wiki.for_each_page(
-    enVillagers,
-    (pageData) => {
-      const editedText = pageData.wikitext.replace(
-        /\{\{Weekly Wants.*\}\}/,
-        "{{Weekly Wants|ChapaaCurious|ChapaaCurious|ChapaaCurious|ChapaaCurious}}",
-      );
-      return editedText;
-    },
-    {
-      summary: "Reset weekly wants",
-      bot: 1,
-      minor: 1,
-    },
+  console.assert(
+    enVillagers.length === CURRENT_NUMBER_OF_VILLAGERS,
+    `Villager count does not equal ${CURRENT_NUMBER_OF_VILLAGERS}, did a new villager get added? Or did we pick up a non-English translated page?`,
   );
+
+  await wiki.for_each_page(enVillagers, (pageData) => {
+    const pageText = pageData.wikitext;
+    // console.log(pageText);
+    const weeklyWantsTemplate = "{{Weekly Wants|";
+    const beginningOfWeeklyWants = pageText.indexOf(weeklyWantsTemplate);
+    const templateEnder = "}}"; // Assumption
+    const endOfWeeklyWantsSection = pageText.indexOf(
+      templateEnder,
+      beginningOfWeeklyWants,
+    );
+    const weeklyWantsSection = pageText
+      .substring(beginningOfWeeklyWants, endOfWeeklyWantsSection)
+      .substring(weeklyWantsTemplate.length);
+    const weeklyWantsList = weeklyWantsSection.split("|");
+    villagerWeeklyWants.set(
+      pageData.title,
+      weeklyWantsList.map((w, i) => ({
+        item: w !== "ChapaaCurious" ? w : "",
+        level: i + 1,
+      })),
+    );
+    return skipEdit;
+  });
 }
 
 export async function getAllVillagerLikesAndWeeklyWants(
@@ -136,20 +124,6 @@ export async function getAllVillagerLikesAndWeeklyWants(
         continue;
       }
       knownGifts.add(like);
-    }
-    const weeklyWantsList = getVillagerWeeklyWants(pageData);
-    villagerWeeklyWants.set(
-      pageData.title,
-      weeklyWantsList.map((w, i) => ({
-        item: w !== "ChapaaCurious" ? w : "",
-        level: i + 1,
-      })),
-    );
-    for (const want of weeklyWantsList) {
-      if (want === "ChapaaCurious") {
-        continue;
-      }
-      knownGifts.add(want);
     }
     return skipEdit;
   });

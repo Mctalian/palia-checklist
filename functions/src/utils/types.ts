@@ -10,6 +10,7 @@ export type Wiki = {
     options?: { [key: string]: number | string },
   ) => Promise<void>;
   listen: (callback: ListenCallback, options?: ListenOptions) => void;
+  login: (u: string, p: string) => Promise<void>;
 };
 
 export type WikiPage = {
