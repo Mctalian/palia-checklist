@@ -13,7 +13,7 @@
         "firebase-debug.log",
         "firebase-debug.*.log"
       ],
-      "predeploy": ["trunk check", "yarn workspaces run build"],
+      "predeploy": ["yarn workspaces run build"],
       "runtime": "nodejs18"
     }
   ],

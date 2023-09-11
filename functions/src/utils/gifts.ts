@@ -106,8 +106,7 @@ export async function getVillagerWeeklyWants(wiki: Wiki) {
 }
 
 export async function getAllVillagerLikesAndWeeklyWants(
-  wiki: Wiki,
-  startListener = true,
+  wiki: Wiki
 ) {
   const enVillagers = await getEnglishVillagerPages(wiki);
 
@@ -127,22 +126,4 @@ export async function getAllVillagerLikesAndWeeklyWants(
     }
     return skipEdit;
   });
-
-  const enVillagerTitles = enVillagers.map((p) => p.title);
-
-  if (startListener) {
-    await wiki.listen(
-      async (pageData) => {
-        console.log(pageData.title, JSON.stringify(pageData));
-        await getAllVillagerLikesAndWeeklyWants(wiki, false);
-      },
-      {
-        delay: "2m",
-        filter: (pageData) => {
-          return enVillagerTitles.includes(pageData.title);
-        },
-        namespace: "0",
-      },
-    );
-  }
 }
