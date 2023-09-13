@@ -9,6 +9,7 @@ import { skip_edit as skipEdit } from "wikiapi";
 import { Wiki, WikiPage } from "./types";
 import { getEnglishVillagerPages } from "./page-helpers";
 import { CURRENT_NUMBER_OF_VILLAGERS } from "./villagers";
+import * as logger from "firebase-functions/logger";
 
 export type WeeklyWant = {
   item: string;
@@ -75,10 +76,10 @@ export function getVillagerLikes(pageData: WikiPage) {
 export async function getVillagerWeeklyWants(wiki: Wiki) {
   const enVillagers = await getEnglishVillagerPages(wiki);
 
-  console.assert(
-    enVillagers.length === CURRENT_NUMBER_OF_VILLAGERS,
-    `Villager count does not equal ${CURRENT_NUMBER_OF_VILLAGERS}, did a new villager get added? Or did we pick up a non-English translated page?`,
-  );
+  if (enVillagers.length !== CURRENT_NUMBER_OF_VILLAGERS) {
+    logger.warn(`Villager count does not equal ${CURRENT_NUMBER_OF_VILLAGERS}, did a new villager get added? Or did we pick up a non-English translated page?`);
+  }
+  
 
   await wiki.for_each_page(enVillagers, (pageData) => {
     const pageText = pageData.wikitext;
@@ -110,10 +111,11 @@ export async function getAllVillagerLikesAndWeeklyWants(
 ) {
   const enVillagers = await getEnglishVillagerPages(wiki);
 
-  console.assert(
-    enVillagers.length === CURRENT_NUMBER_OF_VILLAGERS,
-    `Villager count does not equal ${CURRENT_NUMBER_OF_VILLAGERS}, did a new villager get added? Or did we pick up a non-English translated page?`,
-  );
+  if (enVillagers.length !== CURRENT_NUMBER_OF_VILLAGERS) {
+    logger.warn(
+      `Villager count does not equal ${CURRENT_NUMBER_OF_VILLAGERS}, did a new villager get added? Or did we pick up a non-English translated page?`
+    );
+  }
 
   await wiki.for_each_page(enVillagers, (pageData) => {
     const likesList = getVillagerLikes(pageData);

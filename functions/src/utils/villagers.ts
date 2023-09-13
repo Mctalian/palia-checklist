@@ -1,7 +1,7 @@
 import { getEnglishVillagerPages } from "./page-helpers";
 import { getLoggedInWiki } from "./wiki";
 
-export const CURRENT_NUMBER_OF_VILLAGERS = 23;
+export const CURRENT_NUMBER_OF_VILLAGERS = 24;
 
 export async function allVillagers() {
   const wiki = await getLoggedInWiki();
