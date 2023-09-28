@@ -63,8 +63,8 @@ export const getAllItems = onCall(
     logger.info(items, { structuredData: true });
     if (items.size === 0 || reset) {
       await queryWiki();
-      await logLastRefreshTime(db);
       await addItemsToCollections(db);
+      await logLastRefreshTime(db);
       return {
         items: Array.from(await getItemsFromTypeCollections(db)),
         nextRefresh: await timeOfNextAutoRefresh(db),
@@ -137,7 +137,7 @@ async function isDataStale(db: Firestore) {
     .doc("items")
     .get()) as DocumentSnapshot<ItemDocSchema>;
   const data = itemsRef.data();
-  if (!data) {
+  if (!data || !data.lastRefreshTime) {
     return true;
   }
   const now = new Date();
