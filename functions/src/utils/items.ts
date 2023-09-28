@@ -41,7 +41,7 @@ export async function getAllKnownItems(wiki: Wiki) {
 }
 
 async function getAllArrows(wiki: Wiki) {
-  const pages = (await wiki.categorymembers("Arrow", { namespace: "0" })).map(
+  const pages = (await wiki.categorymembers("Arrow", { namespace: "0" })).filter(p => !p.title.includes("/")).map(
     (p) => p.title,
   );
   for (const page of pages) {
@@ -55,7 +55,7 @@ async function getAllArrows(wiki: Wiki) {
 }
 
 async function getAllBait(wiki: Wiki) {
-  const pages = (await wiki.categorymembers("Bait", { namespace: "0" })).map(
+  const pages = (await wiki.categorymembers("Bait", { namespace: "0" })).filter(p => !p.title.includes("/")).map(
     (p) => p.title,
   );
   for (const page of pages) {
@@ -69,7 +69,7 @@ async function getAllBait(wiki: Wiki) {
 }
 
 async function getAllBugs(wiki: Wiki) {
-  const pages = (await wiki.categorymembers("Insect", { namespace: "0" })).map(
+  const pages = (await wiki.categorymembers("Insect", { namespace: "0" })).filter(p => !p.title.includes("/")).map(
     (p) => p.title,
   );
   for (const page of pages) {
@@ -83,7 +83,7 @@ async function getAllBugs(wiki: Wiki) {
 }
 
 async function getAllCrops(wiki: Wiki) {
-  const pages = (await wiki.categorymembers("Crop", { namespace: "0" })).map(
+  const pages = (await wiki.categorymembers("Crop", { namespace: "0" })).filter(p => !p.title.includes("/")).map(
     (p) => p.title,
   );
   for (const page of pages) {
@@ -111,7 +111,7 @@ async function getAllConsumables(wiki: Wiki) {
 }
 
 async function getAllDishes(wiki: Wiki) {
-  const pages = (await wiki.categorymembers("Dish", { namespace: "0" })).map(
+  const pages = (await wiki.categorymembers("Dish", { namespace: "0" })).filter(p => !p.title.includes("/")).map(
     (p) => p.title,
   );
   for (const page of pages) {
@@ -215,7 +215,7 @@ async function getAllMaterials(wiki: Wiki) {
 }
 
 async function getAllShinyPebbles(wiki: Wiki) {
-  const pages = (await wiki.categorymembers("Shiny Pebble")).map(
+  const pages = (await wiki.categorymembers("Shiny Pebble")).filter(p => !p.title.includes("/")).map(
     (p) => p.title,
   );
   for (const page of pages) {
@@ -253,7 +253,7 @@ async function getAllSmokeBombs(wiki: Wiki) {
 }
 
 async function getAllTreasureChests(wiki: Wiki) {
-  const pages = (await wiki.categorymembers("Treasure Chest")).map(
+  const pages = (await wiki.categorymembers("Treasure Chest")).filter(p => !p.title.includes("/")).map(
     (p) => p.title,
   );
   for (const page of pages) {
