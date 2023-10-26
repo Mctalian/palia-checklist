@@ -4,6 +4,7 @@ export type Wiki = {
     options?: { [key: string]: number | string },
   ) => Promise<WikiPage[]>;
   embeddedin: (s: string) => Promise<WikiPage[]>;
+  page: (title: string, options?: { [key: string]: number | string }) => Promise<WikiPage>;
   for_each_page: (
     pages: WikiPage[],
     callback: ForEachCallback,
@@ -16,6 +17,7 @@ export type Wiki = {
 export type WikiPage = {
   title: string;
   wikitext: string;
+  pageid: number;
 };
 
 export type ListenOptions = {

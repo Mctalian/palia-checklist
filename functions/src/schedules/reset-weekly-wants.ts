@@ -57,7 +57,7 @@ async function resetWeeklyWants() {
     (pageData: WikiPage) => {
       const editedText = pageData.wikitext.replace(
         /\{\{Weekly Wants.*\}\}/,
-        "{{Weekly Wants|ChapaaCurious|ChapaaCurious|ChapaaCurious|ChapaaCurious}}",
+        "{{Weekly Wants||||}}",
       );
       if (doResetWeek.value()) {
         logger.info("Actually resetting!", { structuredData: true });

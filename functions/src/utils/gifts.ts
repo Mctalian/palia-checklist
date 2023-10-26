@@ -79,22 +79,20 @@ export async function getVillagerWeeklyWants(wiki: Wiki) {
   if (enVillagers.length !== CURRENT_NUMBER_OF_VILLAGERS) {
     logger.warn(`Villager count does not equal ${CURRENT_NUMBER_OF_VILLAGERS}, did a new villager get added? Or did we pick up a non-English translated page?`);
   }
-  
 
-  await wiki.for_each_page(enVillagers, (pageData) => {
+  const villagersWithSubpages: string[] = []
+  for (const villagerPage of enVillagers) {
+    if (await extractWeeklyWantsFromSubPage(wiki, villagerPage.title)) {
+      villagersWithSubpages.push(villagerPage.title);
+    }
+  };
+  logger.debug(villagersWithSubpages.length);
+
+  const legacyLayoutPages = enVillagers.filter(p => !villagersWithSubpages.includes(p.title));
+  logger.debug(legacyLayoutPages.length);
+  await wiki.for_each_page(legacyLayoutPages, (pageData) => {
     const pageText = pageData.wikitext;
-    // console.log(pageText);
-    const weeklyWantsTemplate = "{{Weekly Wants|";
-    const beginningOfWeeklyWants = pageText.indexOf(weeklyWantsTemplate);
-    const templateEnder = "}}"; // Assumption
-    const endOfWeeklyWantsSection = pageText.indexOf(
-      templateEnder,
-      beginningOfWeeklyWants,
-    );
-    const weeklyWantsSection = pageText
-      .substring(beginningOfWeeklyWants, endOfWeeklyWantsSection)
-      .substring(weeklyWantsTemplate.length);
-    const weeklyWantsList = weeklyWantsSection.split("|");
+    const weeklyWantsList = getWeeklyWantsFromTemplate(pageText)
     villagerWeeklyWants.set(
       pageData.title,
       weeklyWantsList.map((w, i) => ({
@@ -104,6 +102,41 @@ export async function getVillagerWeeklyWants(wiki: Wiki) {
     );
     return skipEdit;
   });
+}
+
+async function extractWeeklyWantsFromSubPage(wiki: Wiki, villager: string) {
+  const pageData = await wiki.page(`${villager}/Weekly_Wants`);
+  logger.debug(JSON.stringify(pageData))
+  if (!pageData || !pageData.pageid) {
+    logger.warn("Villager does not have a Weekly Wants subpage")
+    return false;
+  }
+  const pageText = pageData.wikitext;
+  logger.debug("Extracting weekly wants from template on subpage.")
+  const weeklyWantsList = getWeeklyWantsFromTemplate(pageText);
+  villagerWeeklyWants.set(
+    villager,
+    weeklyWantsList.map((w, i) => ({
+      item: w !== "ChapaaCurious" && w.length > 0 && w.length ? w : "",
+      level: i + 1,
+    })),
+  );
+
+  return true;
+}
+
+function getWeeklyWantsFromTemplate(pageText: string) {
+  const weeklyWantsTemplate = "{{Weekly Wants|";
+  const beginningOfWeeklyWants = pageText.indexOf(weeklyWantsTemplate);
+  const templateEnder = "}}"; // Assumption
+  const endOfWeeklyWantsSection = pageText.indexOf(
+    templateEnder,
+    beginningOfWeeklyWants,
+  );
+  const weeklyWantsSection = pageText
+    .substring(beginningOfWeeklyWants, endOfWeeklyWantsSection)
+    .substring(weeklyWantsTemplate.length);
+  return weeklyWantsSection.split("|");
 }
 
 export async function getAllVillagerLikesAndWeeklyWants(
