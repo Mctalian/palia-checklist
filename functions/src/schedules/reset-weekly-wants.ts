@@ -8,7 +8,7 @@ import {
 import * as logger from "firebase-functions/logger";
 import * as Wikiapi from "wikiapi";
 import { WikiPage } from "../utils/types";
-import { getEnglishVillagerPages } from "../utils/page-helpers";
+import { getEnglishVillagerWeeklyWantSubPages } from "../utils/page-helpers";
 import { getLoggedInWiki } from "../utils/wiki";
 
 const { skip_edit: skipEdit } = Wikiapi;
@@ -44,20 +44,28 @@ export const paliaWikiResetWeeklyWants = onSchedule(
   },
 );
 
+const clearWants = 
+`{{Weekly Wants
+  |
+  |
+  |
+  |
+}}`;
+
 /**
  * Edits each English villager page to reset the Weekly Wants
  */
 async function resetWeeklyWants() {
   const wiki = await getLoggedInWiki();
 
-  const enVillagers = await getEnglishVillagerPages(wiki);
+  const enVillagerWeeklyWantSubpages = await getEnglishVillagerWeeklyWantSubPages(wiki);
 
   await wiki.for_each_page(
-    enVillagers,
+    enVillagerWeeklyWantSubpages,
     (pageData: WikiPage) => {
       const editedText = pageData.wikitext.replace(
-        /\{\{Weekly Wants.*\}\}/,
-        "{{Weekly Wants||||}}",
+        /\{\{Weekly Wants[\s\S]*?\}\}/,
+        clearWants,
       );
       if (doResetWeek.value()) {
         logger.info("Actually resetting!", { structuredData: true });

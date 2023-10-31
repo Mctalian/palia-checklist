@@ -90,22 +90,24 @@ export async function getVillagerWeeklyWants(wiki: Wiki) {
 
   const legacyLayoutPages = enVillagers.filter(p => !villagersWithSubpages.includes(p.title));
   logger.debug(legacyLayoutPages.length);
-  await wiki.for_each_page(legacyLayoutPages, (pageData) => {
-    const pageText = pageData.wikitext;
-    const weeklyWantsList = getWeeklyWantsFromTemplate(pageText)
-    villagerWeeklyWants.set(
-      pageData.title,
-      weeklyWantsList.map((w, i) => ({
-        item: w !== "ChapaaCurious" ? w : "",
-        level: i + 1,
-      })),
-    );
-    return skipEdit;
-  });
+  if (legacyLayoutPages.length > 0) {
+    await wiki.for_each_page(legacyLayoutPages, (pageData) => {
+      const pageText = pageData.wikitext;
+      const weeklyWantsList = getWeeklyWantsFromTemplate(pageText)
+      villagerWeeklyWants.set(
+        pageData.title,
+        weeklyWantsList.map((w, i) => ({
+          item: w !== "ChapaaCurious" ? w : "",
+          level: i + 1,
+        })),
+      );
+      return skipEdit;
+    });
+  }
 }
 
 async function extractWeeklyWantsFromSubPage(wiki: Wiki, villager: string) {
-  const pageData = await wiki.page(`${villager}/Weekly_Wants`);
+  const pageData = await wiki.page(`${villager}/Weekly Wants`);
   logger.debug(JSON.stringify(pageData))
   if (!pageData || !pageData.pageid) {
     logger.warn("Villager does not have a Weekly Wants subpage")
@@ -117,7 +119,7 @@ async function extractWeeklyWantsFromSubPage(wiki: Wiki, villager: string) {
   villagerWeeklyWants.set(
     villager,
     weeklyWantsList.map((w, i) => ({
-      item: w !== "ChapaaCurious" && w.length > 0 && w.length ? w : "",
+      item: w !== "ChapaaCurious" && w.length ? w : "",
       level: i + 1,
     })),
   );
@@ -125,8 +127,8 @@ async function extractWeeklyWantsFromSubPage(wiki: Wiki, villager: string) {
   return true;
 }
 
-function getWeeklyWantsFromTemplate(pageText: string) {
-  const weeklyWantsTemplate = "{{Weekly Wants|";
+export function getWeeklyWantsFromTemplate(pageText: string) {
+  const weeklyWantsTemplate = "{{Weekly Wants";
   const beginningOfWeeklyWants = pageText.indexOf(weeklyWantsTemplate);
   const templateEnder = "}}"; // Assumption
   const endOfWeeklyWantsSection = pageText.indexOf(
@@ -136,7 +138,7 @@ function getWeeklyWantsFromTemplate(pageText: string) {
   const weeklyWantsSection = pageText
     .substring(beginningOfWeeklyWants, endOfWeeklyWantsSection)
     .substring(weeklyWantsTemplate.length);
-  return weeklyWantsSection.split("|");
+  return weeklyWantsSection.split("|").map((e) => e.trim()).filter((_e, i) => i > 0);
 }
 
 export async function getAllVillagerLikesAndWeeklyWants(
