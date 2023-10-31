@@ -1,4 +1,4 @@
-import { Wiki } from "./types";
+import { WikiApi } from "./wiki-api";
 
 export const arrowItems = new Set<string>();
 export const baitItems = new Set<string>();
@@ -18,250 +18,129 @@ export const seedItems = new Set<string>();
 export const smokeBombItems = new Set<string>();
 export const treasureChestItems = new Set<string>();
 
-export async function getAllKnownItems(wiki: Wiki) {
+export async function getAllKnownItems() {
   await Promise.all([
-    getAllArrows(wiki),
-    getAllBait(wiki),
-    getAllBugs(wiki),
-    getAllConsumables(wiki),
-    getAllCrops(wiki),
-    getAllDishes(wiki),
-    getAllFertilizers(wiki),
-    getAllFireworks(wiki),
-    getAllFish(wiki),
-    getAllGatherables(wiki),
-    getAllIngredients(wiki),
-    getAllJunk(wiki),
-    getAllMaterials(wiki),
-    getAllShinyPebbles(wiki),
-    getAllSeeds(wiki),
-    getAllSmokeBombs(wiki),
-    getAllTreasureChests(wiki),
+    getAllArrows(),
+    getAllBait(),
+    getAllBugs(),
+    getAllConsumables(),
+    getAllCrops(),
+    getAllDishes(),
+    getAllFertilizers(),
+    getAllFireworks(),
+    getAllFish(),
+    getAllGatherables(),
+    getAllIngredients(),
+    getAllJunk(),
+    getAllMaterials(),
+    getAllShinyPebbles(),
+    getAllSeeds(),
+    getAllSmokeBombs(),
+    getAllTreasureChests(),
   ]);
 }
 
-async function getAllArrows(wiki: Wiki) {
-  const pages = (await wiki.categorymembers("Arrow", { namespace: "0" })).filter(p => !p.title.includes("/")).map(
+async function queryWikiForCategory(category: string, set: Set<string>) {
+  const wiki = await WikiApi.getInstance();
+  const pages = (await wiki.getPagesInCategory(category))?.filter(p => !p.title.includes("/")).filter(p => !p.title.includes("Category:")).map(
     (p) => p.title,
-  );
+  ) ?? [];
   for (const page of pages) {
-    arrowItems.add(page);
+    set.add(page);
   }
   console.assert(
-    arrowItems.size > 0,
-    "There must have been a category change because arrowItemns has no elements.",
+    set.size > 0,
+    `There must have been a category change because we found no ${category} items.`,
   );
+  return set;
+}
+
+async function getAllArrows() {
+  await queryWikiForCategory("Arrow", arrowItems);
   return arrowItems;
 }
 
-async function getAllBait(wiki: Wiki) {
-  const pages = (await wiki.categorymembers("Bait", { namespace: "0" })).filter(p => !p.title.includes("/")).map(
-    (p) => p.title,
-  );
-  for (const page of pages) {
-    baitItems.add(page);
-  }
-  console.assert(
-    baitItems.size > 0,
-    "There must have been a category change because baitItems has no elements.",
-  );
+async function getAllBait() {
+  await queryWikiForCategory("Bait", baitItems);
   return baitItems;
 }
 
-async function getAllBugs(wiki: Wiki) {
-  const pages = (await wiki.categorymembers("Insect", { namespace: "0" })).filter(p => !p.title.includes("/")).map(
-    (p) => p.title,
-  );
-  for (const page of pages) {
-    bugItems.add(page);
-  }
-  console.assert(
-    bugItems.size > 0,
-    "There must have been a category change because bugItems has no elements.",
-  );
+async function getAllBugs() {
+  await queryWikiForCategory("Insect", bugItems);
   return bugItems;
 }
 
-async function getAllCrops(wiki: Wiki) {
-  const pages = (await wiki.categorymembers("Crop", { namespace: "0" })).filter(p => !p.title.includes("/")).map(
-    (p) => p.title,
-  );
-  for (const page of pages) {
-    cropItems.add(page);
-  }
-  console.assert(
-    cropItems.size > 0,
-    "There must have been a category change because cropItems has no elements.",
-  );
+async function getAllCrops() {
+  await queryWikiForCategory("Crop", cropItems);
   return cropItems;
 }
 
-async function getAllConsumables(wiki: Wiki) {
-  const pages = (
-    await wiki.categorymembers("Consumable", { namespace: "0" })
-  ).map((p) => p.title);
-  for (const page of pages) {
-    consumableItems.add(page);
-  }
-  console.assert(
-    consumableItems.size > 0,
-    "There must have been a category change because consumableItems has no elements.",
-  );
+async function getAllConsumables() {
+  await queryWikiForCategory("Consumable", consumableItems);
   return consumableItems;
 }
 
-async function getAllDishes(wiki: Wiki) {
-  const pages = (await wiki.categorymembers("Dish", { namespace: "0" })).filter(p => !p.title.includes("/")).map(
-    (p) => p.title,
-  );
-  for (const page of pages) {
-    dishItems.add(page);
-  }
-  console.assert(
-    dishItems.size > 0,
-    "There must have been a category change because dishItems has no elements.",
-  );
+async function getAllDishes() {
+  await queryWikiForCategory("Dish", dishItems);
   return dishItems;
 }
 
-async function getAllFertilizers(wiki: Wiki) {
-  const pages = (await wiki.categorymembers("Fertilizer")).map((p) => p.title);
-  for (const page of pages) {
-    fertilizerItems.add(page);
-  }
-  console.assert(
-    fertilizerItems.size > 0,
-    "There must have been a category change because fertilizerItems has no elements.",
-  );
+async function getAllFertilizers() {
+  await queryWikiForCategory("Fertilizer", fertilizerItems);
   return fertilizerItems;
 }
 
-async function getAllFireworks(wiki: Wiki) {
-  const pages = (await wiki.categorymembers("Firework")).map((p) => p.title);
-  for (const page of pages) {
-    fireworkItems.add(page);
-  }
-  console.assert(
-    fireworkItems.size > 0,
-    "There must have been a category change because fireworkItems has no elements.",
-  );
+async function getAllFireworks() {
+  await queryWikiForCategory("Firework", fireworkItems);
   return fireworkItems;
 }
 
-async function getAllFish(wiki: Wiki) {
-  const pages = (await wiki.categorymembers("Fish")).map((p) => p.title);
-  for (const page of pages) {
-    fishItems.add(page);
-  }
-  console.assert(
-    fishItems.size > 0,
-    "There must have been a category change because fishItems has no elements.",
-  );
+async function getAllFish() {
+  await queryWikiForCategory("Fish", fishItems);
   return fishItems;
 }
 
-async function getAllGatherables(wiki: Wiki) {
-  const pages = (await wiki.categorymembers("Gatherable")).map((p) => p.title);
-  for (const page of pages) {
-    gatherableItems.add(page);
-  }
-  console.assert(
-    gatherableItems.size > 0,
-    "There must have been a category change because gatherableItems has no elements.",
-  );
+async function getAllGatherables() {
+  await queryWikiForCategory("Gatherable", gatherableItems);
   return gatherableItems;
 }
 
-async function getAllIngredients(wiki: Wiki) {
-  const pages = (await wiki.categorymembers("Ingredient")).map((p) => p.title);
-  for (const page of pages) {
-    ingredientItems.add(page);
-  }
-  console.assert(
-    ingredientItems.size > 0,
-    "There must have been a category change because ingredientItems has no elements.",
-  );
+async function getAllIngredients() {
+  await queryWikiForCategory("Ingredient", ingredientItems);
   return ingredientItems;
 }
 
-async function getAllJunk(wiki: Wiki) {
-  const pages = (await wiki.categorymembers("Junk")).map((p) => p.title);
-  for (const page of pages) {
-    junkItems.add(page);
-  }
-  console.assert(
-    junkItems.size > 0,
-    "There must have been a category change because junkItems has no elements.",
-  );
+async function getAllJunk() {
+  await queryWikiForCategory("Junk", junkItems);
   return junkItems;
 }
 
-async function getAllMaterials(wiki: Wiki) {
-  const pages = (await wiki.categorymembers("Material")).map((p) => p.title);
-  for (const page of pages) {
-    if (page.indexOf("Materials") >= 0) {
-      continue;
+async function getAllMaterials() {
+  const tempSet = await queryWikiForCategory("Material", new Set<string>());
+  tempSet.forEach((item) => {
+    if (item.indexOf("Materials") < 0 && item.indexOf("/") < 0 ) {
+      materialItems.add(item);
     }
-    if (page.indexOf("/") >= 0) {
-      continue;
-    }
-    materialItems.add(page);
-  }
-  console.assert(
-    materialItems.size > 0,
-    "There must have been a category change because materialItems has no elements.",
-  );
+  });
   return materialItems;
 }
 
-async function getAllShinyPebbles(wiki: Wiki) {
-  const pages = (await wiki.categorymembers("Shiny Pebble")).filter(p => !p.title.includes("/")).map(
-    (p) => p.title,
-  );
-  for (const page of pages) {
-    pebbleItems.add(page);
-  }
-  console.assert(
-    pebbleItems.size > 0,
-    "There must have been a category change because pebbleItems has no elements.",
-  );
+async function getAllShinyPebbles() {
+  await queryWikiForCategory("Shiny Pebble", pebbleItems);
   return pebbleItems;
 }
 
-async function getAllSeeds(wiki: Wiki) {
-  const pages = (await wiki.categorymembers("Seed")).map((p) => p.title);
-  for (const page of pages) {
-    seedItems.add(page);
-  }
-  console.assert(
-    seedItems.size > 0,
-    "There must have been a category change because seedItems has no elements.",
-  );
+async function getAllSeeds() {
+  await queryWikiForCategory("Seed", seedItems);
   return seedItems;
 }
 
-async function getAllSmokeBombs(wiki: Wiki) {
-  const pages = (await wiki.categorymembers("Smoke Bomb")).map((p) => p.title);
-  for (const page of pages) {
-    smokeBombItems.add(page);
-  }
-  console.assert(
-    smokeBombItems.size > 0,
-    "There must have been a category change because smokeBombItems has no elements.",
-  );
+async function getAllSmokeBombs() {
+  await queryWikiForCategory("Smoke Bomb", smokeBombItems);
   return smokeBombItems;
 }
 
-async function getAllTreasureChests(wiki: Wiki) {
-  const pages = (await wiki.categorymembers("Treasure Chest")).filter(p => !p.title.includes("/")).map(
-    (p) => p.title,
-  );
-  for (const page of pages) {
-    treasureChestItems.add(page);
-  }
-  console.assert(
-    treasureChestItems.size > 0,
-    "There must have been a category change because treasureChestItems has no elements.",
-  );
+async function getAllTreasureChests() {
+  await queryWikiForCategory("Treasure Chest", treasureChestItems);
   return treasureChestItems;
 }

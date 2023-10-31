@@ -14,7 +14,6 @@ import {
 } from "../utils/gifts";
 import { CURRENT_NUMBER_OF_VILLAGERS } from "../utils/villagers";
 import { getEnglishVillagerPages } from "../utils/page-helpers";
-import { getLoggedInWiki } from "../utils/wiki";
 
 const ONE_WEEK = 7 * 24 * 60 * 60 * 1000;
 
@@ -56,7 +55,7 @@ export const getVillagerWants = onCall(
         (w) => w.villager.toUpperCase() === villager.toUpperCase(),
       );
     } else {
-      wants = allWants;
+      wants = allWants.sort((a, b) => a.villager.localeCompare(b.villager));
     }
 
     return {
@@ -95,8 +94,7 @@ async function getAllWeeklyWants(db: Firestore) {
 }
 
 async function queryWiki() {
-  const wiki = await getLoggedInWiki();
-  await getVillagerWeeklyWants(wiki);
+  await getVillagerWeeklyWants();
 }
 
 async function logLastResetTime(db: Firestore) {
@@ -192,8 +190,7 @@ async function getExistingVillagerWeeklyWants(
 }
 
 async function addWeeklyWantsToCollections(db: Firestore) {
-  const wiki = await getLoggedInWiki();
-  const enVillagers = await getEnglishVillagerPages(wiki);
+  const enVillagers = await getEnglishVillagerPages();
 
   for (const villager of enVillagers.map((p) => p.title)) {
     const doc = await getWeeklyWantsDoc(db);

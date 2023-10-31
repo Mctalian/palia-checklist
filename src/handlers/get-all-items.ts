@@ -26,7 +26,6 @@ import {
   smokeBombItems,
   treasureChestItems,
 } from "../utils/items";
-import { getLoggedInWiki } from "../utils/wiki";
 
 type GetAllItemsRequest = {
   reset: boolean;
@@ -121,8 +120,7 @@ async function getItemsFromSingleTypeCollection(
 }
 
 async function queryWiki() {
-  const wiki = await getLoggedInWiki();
-  await getAllKnownItems(wiki);
+  await getAllKnownItems();
 }
 
 async function logLastRefreshTime(db: Firestore) {

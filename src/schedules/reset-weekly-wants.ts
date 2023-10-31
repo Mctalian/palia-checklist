@@ -6,12 +6,8 @@ import {
   wikiPassword,
 } from "../utils/params";
 import * as logger from "firebase-functions/logger";
-import * as Wikiapi from "wikiapi";
-import { WikiPage } from "../utils/types";
-import { getEnglishVillagerWeeklyWantSubPages } from "../utils/page-helpers";
-import { getLoggedInWiki } from "../utils/wiki";
-
-const { skip_edit: skipEdit } = Wikiapi;
+import { getEnglishVillagerWeeklyWantSubPageNames } from "../utils/page-helpers";
+import { WikiApi } from "../utils/wiki-api";
 
 export const paliaWikiResetWeeklyWants = onSchedule(
   {
@@ -56,29 +52,16 @@ const clearWants =
  * Edits each English villager page to reset the Weekly Wants
  */
 async function resetWeeklyWants() {
-  const wiki = await getLoggedInWiki();
+  const wiki = await WikiApi.getInstance();
+  const enVillagerWeeklyWantSubpages = await getEnglishVillagerWeeklyWantSubPageNames();
 
-  const enVillagerWeeklyWantSubpages = await getEnglishVillagerWeeklyWantSubPages(wiki);
+  logger.debug(enVillagerWeeklyWantSubpages, { structuredData: true });
 
-  await wiki.for_each_page(
-    enVillagerWeeklyWantSubpages,
-    (pageData: WikiPage) => {
-      const editedText = pageData.wikitext.replace(
-        /\{\{Weekly Wants[\s\S]*?\}\}/,
-        clearWants,
-      );
-      if (doResetWeek.value()) {
-        logger.info("Actually resetting!", { structuredData: true });
-        return editedText;
-      } else {
-        logger.info("No edit!", { structuredData: true });
-        return skipEdit;
-      }
-    },
-    {
-      summary: "Reset weekly wants",
-      bot: 1,
-      minor: 1,
-    },
-  );
+  const requests = [];
+  for (const subpage of enVillagerWeeklyWantSubpages) {
+    requests.push(wiki.edit(subpage, clearWants, "Reset Weekly Wants"));
+  }
+  await Promise.all(requests);
+
+  await wiki.purge("Category:Villager");
 }
