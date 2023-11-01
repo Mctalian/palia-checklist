@@ -64,4 +64,5 @@ async function resetWeeklyWants() {
   await Promise.all(requests);
 
   await wiki.purge("Category:Villager");
+  await wiki.purge("Villager Weekly Wishes");
 }
