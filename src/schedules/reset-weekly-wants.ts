@@ -11,8 +11,8 @@ import { WikiApi } from "../utils/wiki-api";
 
 export const paliaWikiResetWeeklyWants = onSchedule(
   {
-    schedule: "0 22 * * SUN",
-    timeZone: "America/Denver",
+    schedule: "0 4 * * MON",
+    timeZone: "Etc/UTC",
     timeoutSeconds: 240,
     secrets: [wikiApiUrl, wikiUsername, wikiPassword],
     serviceAccount:
