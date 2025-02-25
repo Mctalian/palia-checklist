@@ -6,4 +6,15 @@ I ended up pausing the project, but this still has some of the code that serves 
 
 **Beware** blindly running the reset function may actually delete data in the wiki.
 
+## Setup
+
+1. Clone the repo
+1. Ensure node is installed, ideally via nvm (check .nvmrc for the version of node)
+1. Ensure `yarn` is installed
+1. Run `yarn` from the root directory to install dependencies
+1. Ensure `firebase-tools` is installed globally (`npm install -g firebase-tools` or `yarn global add firebase-tools`)
+1. Run `firebase login` to authenticate with Firebase
+
+## Screenshots
+
 ![image](https://github.com/user-attachments/assets/ef240138-a2f7-41f6-8827-3b738565ae47)
