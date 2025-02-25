@@ -16,7 +16,6 @@ export class WikiApi {
     this.client = new Bot({
       protocol: this.wikiApiUrl.protocol.split(":")[0],
       server: this.wikiApiUrl.host,
-      path: this.wikiApiUrl.pathname,
       username: wikiUsername.value(),
       password: wikiPassword.value(),
       concurrency: cpus.length - 1,
