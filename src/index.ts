@@ -1,8 +1,19 @@
-import * as admin from "firebase-admin";
+import dotenv from "dotenv";
 
-admin.initializeApp({
-  projectId: "palia-checklist",
-});
+dotenv.config({ quiet: true });
 
-export * from "./handlers";
-export * from "./schedules";
+import { resetWeeklyWants } from "./utils/reset-weekly-wants";
+import { isDryRun } from "./utils/params";
+import { logger } from "./utils/logger";
+
+logger.info("Starting Weekly reset...");
+
+(async () => {
+  if (!isDryRun) {
+    logger.warn("Dry run is disabled, this will make live edits!");
+  } else {
+    logger.info("Dry run is enabled, no live edits will be made.");
+  }
+
+  await resetWeeklyWants(isDryRun);
+})();

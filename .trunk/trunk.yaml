@@ -1,6 +1,6 @@
 version: 0.1
 cli:
-  version: 1.14.1
+  version: 1.25.0
 plugins:
   sources:
     - id: trunk
@@ -8,11 +8,10 @@ plugins:
       uri: https://github.com/trunk-io/plugins
 runtimes:
   enabled:
-    - node@18.12.1
+    - node@22.19.0
     - python@3.10.8
 lint:
   enabled:
-    - eslint@8.48.0
     - checkov@2.4.9
     - git-diff-check
     - markdownlint@0.36.0
@@ -30,9 +29,9 @@ lint:
       commands:
         - name: lint
           run: trufflehog filesystem --json --fail --only-verified ${target}
-    - name: eslint
-      extra_packages:
-        - eslint-plugin-import
-        - eslint-plugin-prettier
-        - "@typescript-eslint/parser"
-        - "@typescript-eslint/eslint-plugin"
+actions:
+  enabled:
+    - trunk-announce
+    - trunk-check-pre-push
+    - trunk-fmt-pre-commit
+    - trunk-upgrade-available

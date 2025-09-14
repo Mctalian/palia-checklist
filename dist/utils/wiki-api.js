@@ -1,41 +1,35 @@
-import Bot from "nodemw";
-import {
-  ArticleInfo,
-  PageEditedResult,
-  type PageInCategory,
-} from "nodemw/lib/types";
-import { wikiApiUrl, wikiPassword, wikiUsername } from "./params";
-
+"use strict";
+var __importDefault =
+  (this && this.__importDefault) ||
+  function (mod) {
+    return mod && mod.__esModule ? mod : { default: mod };
+  };
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.WikiApi = void 0;
+const nodemw_1 = __importDefault(require("nodemw"));
+const params_1 = require("./params");
 const os = require("os");
 const cpus = os.cpus();
-
-export class WikiApi {
-  private static wikiInstance: WikiApi;
-  private readonly client: Bot;
-  private readonly wikiApiUrl: URL;
-
-  private constructor() {
-    this.wikiApiUrl = new URL(wikiApiUrl);
-
-    this.client = new Bot({
+class WikiApi {
+  constructor() {
+    this.wikiApiUrl = new URL(params_1.wikiApiUrl);
+    this.client = new nodemw_1.default({
       protocol: this.wikiApiUrl.protocol.split(":")[0],
       server: this.wikiApiUrl.host,
-      username: wikiUsername,
-      password: wikiPassword,
+      username: params_1.wikiUsername,
+      password: params_1.wikiPassword,
       concurrency: cpus.length - 1,
     });
   }
-
-  public static async getInstance(): Promise<WikiApi> {
+  static async getInstance() {
     if (!WikiApi.wikiInstance) {
       WikiApi.wikiInstance = new WikiApi();
       await WikiApi.wikiInstance.login();
     }
     return WikiApi.wikiInstance;
   }
-
-  public async getPagesInCategory(category: string) {
-    return new Promise<PageInCategory[] | undefined>((resolve, reject) => {
+  async getPagesInCategory(category) {
+    return new Promise((resolve, reject) => {
       this.client.getPagesInCategory(category, (err, results) => {
         if (err) {
           return reject(err);
@@ -44,9 +38,8 @@ export class WikiApi {
       });
     });
   }
-
-  public async getPagesTranscluding(page: string) {
-    return new Promise<unknown | undefined>((resolve, reject) => {
+  async getPagesTranscluding(page) {
+    return new Promise((resolve, reject) => {
       this.client.getPagesTranscluding(page, (err, results) => {
         if (err) {
           return reject(err);
@@ -55,9 +48,8 @@ export class WikiApi {
       });
     });
   }
-
-  public async getArticle(page: string) {
-    return new Promise<string | undefined>((resolve, reject) => {
+  async getArticle(page) {
+    return new Promise((resolve, reject) => {
       this.client.getArticle(page, (err, results) => {
         if (err) {
           return reject(err);
@@ -66,9 +58,8 @@ export class WikiApi {
       });
     });
   }
-
-  public async getArticleInfo(title: string, options?: any) {
-    return new Promise<ArticleInfo[] | undefined>((resolve, reject) => {
+  async getArticleInfo(title, options) {
+    return new Promise((resolve, reject) => {
       this.client.getArticleInfo(title, options, (err, results) => {
         if (err) {
           return reject(err);
@@ -77,14 +68,8 @@ export class WikiApi {
       });
     });
   }
-
-  public async edit(
-    title: string,
-    content: string,
-    summary: string,
-    minor = true,
-  ) {
-    return new Promise<PageEditedResult | undefined>((resolve, reject) => {
+  async edit(title, content, summary, minor = true) {
+    return new Promise((resolve, reject) => {
       this.client.edit(title, content, summary, minor, (err, results) => {
         if (err) {
           return reject(err);
@@ -93,9 +78,8 @@ export class WikiApi {
       });
     });
   }
-
-  public async purge(titles: string) {
-    return new Promise<unknown | undefined>((resolve, reject) => {
+  async purge(titles) {
+    return new Promise((resolve, reject) => {
       this.client.purge(titles, (err, results) => {
         if (err) {
           return reject(err);
@@ -104,9 +88,8 @@ export class WikiApi {
       });
     });
   }
-
-  public async login() {
-    return new Promise<unknown | undefined>((resolve, reject) => {
+  async login() {
+    return new Promise((resolve, reject) => {
       this.client.logIn((err, results) => {
         if (err) {
           return reject(err);
@@ -116,3 +99,5 @@ export class WikiApi {
     });
   }
 }
+exports.WikiApi = WikiApi;
+//# sourceMappingURL=wiki-api.js.map

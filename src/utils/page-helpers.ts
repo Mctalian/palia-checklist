@@ -7,8 +7,7 @@ import { WikiApi } from "./wiki-api";
 export async function getEnglishVillagerPages() {
   const wiki = await WikiApi.getInstance();
   const villagers = (await wiki.getPagesInCategory("Villager")) ?? [];
-  return villagers
-    .filter((p) => p.title.indexOf("/") < 0);
+  return villagers.filter((p) => p.title.indexOf("/") < 0);
 }
 
 /**
@@ -21,6 +20,22 @@ export async function getEnglishVillagerWeeklyWantSubPageNames() {
     .filter((p) => p.title.indexOf("/") < 0)
     .filter((p) => p.title.indexOf("Category") < 0)
     .map((p) => `${p.title}/Weekly Wants`);
-  return villagerPageTitles
-  
+  return villagerPageTitles;
+}
+
+/**
+ *
+ * @return {string[]} - English Weekly Wants subpage names for villagers
+ */
+export async function getWeeklyWantTranscludes() {
+  const wiki = await WikiApi.getInstance();
+  const transcludedPages = (await wiki.getPagesTranscluding(
+    "Template:Weekly Wants",
+  )) as any[];
+
+  const pageNames = transcludedPages
+    .filter((p) => p.title.indexOf("/Weekly Wants") > 0)
+    .map((p) => p.title);
+
+  return pageNames;
 }

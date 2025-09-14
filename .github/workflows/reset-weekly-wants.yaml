@@ -1,0 +1,40 @@
+name: Reset Weekly Wants
+on:
+  schedule:
+    - cron: "0 4 * * 1" # At 04:00 on Monday
+  workflow_dispatch: {}
+
+jobs:
+  reset-weekly-wants:
+    runs-on: ubuntu-latest
+    env:
+      WIKI_API_URL: ${{ secrets.WIKI_API_URL}}
+      WIKI_USERNAME: ${{ secrets.WIKI_USERNAME }}
+      WIKI_PASSWORD: ${{ secrets.WIKI_PASSWORD }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Ensure Dry Run
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          echo "DO_WEEKLY_RESET=false" >> $GITHUB_ENV
+          echo "DEBUG=true" >> $GITHUB_ENV
+
+      - name: Set reset mode
+        if: github.event_name == 'schedule'
+        run: |
+          echo "DO_WEEKLY_RESET=true" >> $GITHUB_ENV
+          echo "DEBUG=false" >> $GITHUB_ENV
+
+      - name: Reset Weekly Wants
+        run: node ./dist/index.js

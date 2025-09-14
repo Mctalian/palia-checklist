@@ -12,8 +12,6 @@ I ended up pausing the project, but this still has some of the code that serves 
 1. Ensure node is installed, ideally via nvm (check .nvmrc for the version of node)
 1. Ensure `yarn` is installed
 1. Run `yarn` from the root directory to install dependencies
-1. Ensure `firebase-tools` is installed globally (`npm install -g firebase-tools` or `yarn global add firebase-tools`)
-1. Run `firebase login` to authenticate with Firebase
 
 ## Screenshots
 

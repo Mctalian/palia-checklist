@@ -1,6 +1,5 @@
-import { defineBoolean, defineSecret } from "firebase-functions/params";
-
-export const doResetWeek = defineBoolean("DO_RESET_WEEK", { default: false });
-export const wikiApiUrl = defineSecret("WIKI_API_URL");
-export const wikiUsername = defineSecret("WIKI_USERNAME");
-export const wikiPassword = defineSecret("WIKI_PASSWORD");
+export const isDebug = process.env.DEBUG === "true";
+export const isDryRun = process.env.DO_WEEKLY_RESET !== "true";
+export const wikiApiUrl = process.env.WIKI_API_URL || "";
+export const wikiUsername = process.env.WIKI_USERNAME || "";
+export const wikiPassword = process.env.WIKI_PASSWORD || "";
