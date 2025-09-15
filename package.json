@@ -3,7 +3,7 @@
   "scripts": {
     "build": "tsc",
     "build:watch": "tsc --watch",
-    "debug": "node dist/index.js | pino-pretty"
+    "debug": "node dist/index.js"
   },
   "dependencies": {
     "dotenv": "17.2.2",

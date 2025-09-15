@@ -24,6 +24,10 @@ lint:
     - linters: [trufflehog]
       paths:
         - yarn.lock
+    - linters: [prettier]
+      paths:
+        - dist/**
+        - node_modules/**
   definitions:
     - name: trufflehog
       commands:

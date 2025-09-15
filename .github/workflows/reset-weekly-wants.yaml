@@ -1,7 +1,8 @@
 name: Reset Weekly Wants
 on:
   schedule:
-    - cron: "0 4 * * 1" # At 04:00 on Monday
+    # At 03:58 UTC on Monday, since there are no guarantees about when the workflow will actually run
+    - cron: "58 3 * * MON"
   workflow_dispatch: {}
 
 jobs:

@@ -1,16 +1,30 @@
 "use strict";
-var __importDefault =
-  (this && this.__importDefault) ||
-  function (mod) {
-    return mod && mod.__esModule ? mod : { default: mod };
-  };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.logger = void 0;
 const pino_1 = __importDefault(require("pino"));
 const params_1 = require("./params");
-exports.logger = (0, pino_1.default)();
-if (params_1.isDebug) {
-  exports.logger.level = "debug";
-  exports.logger.debug("Debug mode is enabled");
-}
+exports.logger = (0, pino_1.default)({
+    level: params_1.isDebug ? "debug" : "info",
+    transport: {
+        targets: [
+            {
+                target: "pino-pretty",
+                options: {
+                    colorize: true,
+                    translateTime: "SYS:standard",
+                    ignore: "pid,hostname",
+                },
+                level: params_1.isDebug ? "debug" : "info",
+            },
+            {
+                target: "pino/file",
+                options: { destination: "./logs/weekly-reset.log", mkdir: true },
+                level: "debug",
+            },
+        ],
+    },
+});
 //# sourceMappingURL=logger.js.map
