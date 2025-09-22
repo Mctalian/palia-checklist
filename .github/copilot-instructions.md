@@ -2,7 +2,7 @@
 
 Palia Checklist is a Node.js/TypeScript application that automatically resets Villager Weekly Wants in the Palia wiki. The application connects to a MediaWiki API to edit wiki pages and runs on a weekly schedule via GitHub Actions.
 
-Always reference these instructions first and fallback to search or bash commands only when you encounter unexpected information that does not match the info here.
+Always reference these instructions first and fallback to search or bash commands only when you encounter unexpected information that does not match the info here. If there is inconsistent information, open an issue so that the inconsistency can be rectified.
 
 ## Working Effectively
 
@@ -14,10 +14,11 @@ Always reference these instructions first and fallback to search or bash command
 5. `npm run build` - Build TypeScript to JavaScript. Takes ~3 seconds. NEVER CANCEL. Set timeout to 60+ seconds.
 
 ### Linting and formatting:
-- `npx prettier --check src` - Check code formatting. Takes ~1 second. Source files should be properly formatted.
-- `npx prettier --write src` - Auto-fix formatting issues if needed
-- DO NOT run prettier on dist/ directory as it contains generated JavaScript files
-- Trunk linting requires internet access and may not work in sandboxed environments
+- `trunk check` - Run linting checks. Takes ~2-3 seconds.
+- `trunk fmt` - Auto-fix formatting and linting issues. Takes ~2-3 seconds.
+- Repository uses Trunk for linting and formatting (configured in .trunk/trunk.yaml)
+- Trunk may require internet access for installation and may not work in sandboxed environments
+- If trunk is not available, fallback to: `npx prettier --check src` and `npx prettier --write src`
 
 ### Run the application:
 - **CRITICAL**: Application requires wiki credentials via environment variables to function
@@ -43,7 +44,7 @@ DO_WEEKLY_RESET=false
 - **CORE SCENARIO**: After making changes, always run the complete build and test sequence:
   1. `yarn install` (if dependencies changed)
   2. `npm run build` (always required after TypeScript changes)
-  3. `npx prettier --check src` (ensure formatting)
+  3. `trunk fmt` (ensure formatting and linting)
   4. `npm run debug` (test application startup)
 - **Expected behavior WITHOUT credentials**: Application should start, log "Starting Weekly reset..." and "Dry run is enabled", then fail with "Invalid URL" error
 - **Expected behavior WITH credentials**: Application should attempt to connect to wiki API (may fail due to network restrictions in sandboxed environments)
@@ -61,7 +62,7 @@ DO_WEEKLY_RESET=false
 .trunk/             # Trunk linting configuration
 .vscode/            # VS Code settings
 README.md           # Project documentation
-dist/               # Compiled JavaScript output (generated)
+dist/               # Compiled JavaScript output (COMMITTED to repository)
 logs/               # Application logs (generated)
 node_modules/       # Dependencies (generated)
 package.json        # Node.js project configuration
@@ -74,6 +75,7 @@ src/                # TypeScript source code
     reset-weekly-wants.ts # Core weekly reset logic
     wiki-api.ts     # MediaWiki API wrapper
 tsconfig.json       # TypeScript compiler configuration
+trunk               # Trunk wrapper script (fallback when trunk not installed)
 yarn.lock          # Yarn dependency lock file
 ```
 
@@ -101,9 +103,9 @@ yarn.lock          # Yarn dependency lock file
 ### Local development workflow:
 1. Make TypeScript changes in src/
 2. Run `npm run build` to compile
-3. Run `npx prettier --check src` to verify formatting
+3. Run `trunk fmt` to verify formatting and linting
 4. Run `npm run debug` to test (will fail without proper .env)
-5. Commit changes (CI will handle the actual wiki operations)
+5. Commit changes including updated dist/ files (CI will handle the actual wiki operations)
 
 ## Important Notes
 
@@ -112,6 +114,18 @@ yarn.lock          # Yarn dependency lock file
 - **Logging**: Application logs to both console (pretty format) and ./logs/weekly-reset.log (JSON format)
 - **Error handling**: Application will exit with error codes on failures (network issues, authentication failures, etc.)
 - **Network requirements**: Requires outbound HTTPS access to palia.wiki.gg for live operations
+- **Git hooks**: Trunk manages git hooks for the repository (pre-commit formatting, pre-push linting)
+
+## Trunk Installation
+
+The repository uses Trunk for linting and formatting. To install trunk locally:
+
+1. **Automatic installation**: `curl -fsSL https://get.trunk.io | bash` (requires internet access)
+2. **Via NPX**: `npx @trunkio/launcher install` (uses existing dev dependency)
+3. **Local binary**: A `./trunk` script is provided in the repository root as a fallback that uses prettier
+4. **Fallback**: If trunk is unavailable, use prettier commands as documented above
+
+Trunk installation may fail in sandboxed environments due to network restrictions. In such cases, use the prettier fallback commands.
 
 ## Troubleshooting
 
@@ -120,7 +134,8 @@ yarn.lock          # Yarn dependency lock file
 - `Error: getaddrinfo ENOTFOUND` - Network connectivity issues or blocked domain access
 - `Request to API failed` - Wiki API authentication or network issues
 - Build failures - Usually TypeScript compilation errors, check src/ files for syntax issues
-- Formatting failures - Run `npx prettier --write src` to auto-fix
+- Formatting failures - Run `trunk fmt` to auto-fix, or fallback to `npx prettier --write src`
+- Trunk installation issues - If trunk is not available, use prettier commands as fallback
 
 ### Timing expectations:
 - Dependency installation: ~1 second

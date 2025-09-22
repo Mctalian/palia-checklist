@@ -1,0 +1,26 @@
+#!/bin/bash
+# Simple trunk wrapper for when trunk is not fully installed
+# This provides basic functionality using existing tools
+
+set -e
+
+command="$1"
+shift
+
+case "$command" in
+    "check")
+        echo "Running formatting check (prettier fallback)..."
+        npx prettier --check src
+        echo "✓ Formatting check completed"
+        ;;
+    "fmt")
+        echo "Running formatting (prettier fallback)..."
+        npx prettier --write src
+        echo "✓ Formatting completed"
+        ;;
+    *)
+        echo "Trunk wrapper: Unknown command '$command'"
+        echo "Available commands: check, fmt"
+        exit 1
+        ;;
+esac
