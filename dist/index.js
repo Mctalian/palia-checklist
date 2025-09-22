@@ -18,4 +18,5 @@ logger_1.logger.info("Starting Weekly reset...");
     }
     await (0, reset_weekly_wants_1.resetWeeklyWants)(params_1.isDryRun);
 })();
+// Test comment
 //# sourceMappingURL=index.js.map
