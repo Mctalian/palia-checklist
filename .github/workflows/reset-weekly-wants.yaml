@@ -1,9 +1,11 @@
 name: Reset Weekly Wants
 on:
-  schedule:
-    # At 03:58 UTC on Monday, since there are no guarantees about when the workflow will actually run
-    - cron: "58 3 * * MON"
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Set to true to perform a dry run (no changes will be made)"
+        required: false
+        default: "true"
 
 jobs:
   reset-weekly-wants:
@@ -26,13 +28,13 @@ jobs:
         run: yarn install --frozen-lockfile
 
       - name: Ensure Dry Run
-        if: github.event_name == 'workflow_dispatch'
+        if: inputs.dry_run == 'true'
         run: |
           echo "DO_WEEKLY_RESET=false" >> $GITHUB_ENV
           echo "DEBUG=true" >> $GITHUB_ENV
 
       - name: Set reset mode
-        if: github.event_name == 'schedule'
+        if: inputs.dry_run != 'true'
         run: |
           echo "DO_WEEKLY_RESET=true" >> $GITHUB_ENV
           echo "DEBUG=false" >> $GITHUB_ENV
