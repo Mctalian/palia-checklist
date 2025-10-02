@@ -9,9 +9,8 @@ I ended up pausing the project, but this still has code that is used to reset ea
 ## Setup
 
 1. Clone the repo
-1. Ensure node is installed, ideally via nvm (check .nvmrc for the version of node)
-1. Ensure `yarn` is installed
-1. Run `yarn` from the root directory to install dependencies
+1. [Install uv](https://docs.astral.sh/uv/getting-started/installation/)
+1. Run `uv sync` to install dependencies and set up a virtual environment
 
 ## Screenshots
 

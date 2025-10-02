@@ -3,41 +3,42 @@ on:
   workflow_dispatch:
     inputs:
       dry_run:
-        description: "Set to true to perform a dry run (no changes will be made)"
+        description: Set to true to perform a dry run (no changes will be made)
         required: false
         default: "true"
+
+permissions: {}
 
 jobs:
   reset-weekly-wants:
     runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: read
     env:
-      WIKI_API_URL: ${{ secrets.WIKI_API_URL}}
       WIKI_USERNAME: ${{ secrets.WIKI_USERNAME }}
       WIKI_PASSWORD: ${{ secrets.WIKI_PASSWORD }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v5
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
         with:
-          node-version-file: .nvmrc
-          cache: yarn
+          enable-cache: true
 
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
+      - name: Sync uv environment
+        run: uv sync
 
       - name: Ensure Dry Run
         if: inputs.dry_run == 'true'
         run: |
           echo "DO_WEEKLY_RESET=false" >> $GITHUB_ENV
-          echo "DEBUG=true" >> $GITHUB_ENV
 
       - name: Set reset mode
         if: inputs.dry_run != 'true'
         run: |
           echo "DO_WEEKLY_RESET=true" >> $GITHUB_ENV
-          echo "DEBUG=false" >> $GITHUB_ENV
 
       - name: Reset Weekly Wants
-        run: node ./dist/index.js
+        run: uv run src/main.py
